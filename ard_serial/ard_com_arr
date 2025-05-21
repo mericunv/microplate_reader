@@ -1,0 +1,61 @@
+import serial 
+import time
+import re
+
+ser = serial.Serial('COM6', baudrate=9600, timeout=1)
+
+def get_valid_columns():
+    while True:
+        user_input = input("Enter columns to process (1-12, separated by commas/spaces): ").strip()
+        if not user_input:
+            print("Please enter at least one column.")
+            continue
+        
+        parts = re.split(r'[, \s]+', user_input)
+        
+        try:
+            columns = list(set(map(int, parts)))
+            if not columns:
+                print("No valid columns entered.")
+                continue
+            
+            invalid = [col for col in columns if col < 1 or col > 12]
+            if invalid:
+                print(f"Invalid columns: {invalid}. Columns must be 1-12.")
+                continue
+            
+            return columns
+        
+        except ValueError:
+            print("Invalid input. Please enter numbers only.")
+
+# Initialize column bytes (12 columns, each represented by a byte)
+column_bytes = [0x00] * 12  # 0x00 means all rows in the column are off
+
+columns = get_valid_columns()  # Get user-selected columns
+
+# Update column_bytes: set selected columns to 0xFF (all rows on)
+for col in columns:
+    column_index = col - 1  # Convert to 0-based index
+    column_bytes[column_index] = 0xFF  # 0xFF is 0b11111111 (all 8 rows enabled)
+
+# Print the byte array for verification
+print("Column bytes to send:", [f'0x{byte:02X}' for byte in column_bytes])
+
+def send_to_arduino():
+    # Convert the list of integers to a bytes object and send
+    data = bytes(column_bytes)
+    print("Sending column data to Arduino...")
+    ser.write(data)
+    
+   
+    time.sleep(0.2)
+    
+    # Read response
+    response = ser.readline().decode('utf-8').strip()
+    if response:
+        print(f"Received from Arduino: {response}")
+    else:
+        print("No response from Arduino.")
+
+send_to_arduino()
