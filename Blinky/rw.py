@@ -15,7 +15,7 @@ def Data(interval, count):
      
         sp.write(i.encode())
     sp.write('\n'.encode()) #finish the sent data with linebreak
-    time.sleep(1)
+    time.sleep(2)
     for i in count:
 
         sp.write(i.encode()) 
