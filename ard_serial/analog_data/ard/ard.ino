@@ -11,7 +11,7 @@ void loop() {
     float values[6];
     for (int i = 0; i < 6; i++) {
       if (input[i] == '1') {
-        values[i] = random(0,100); 
+        values[i] = random(0,100); //replace random() with a analog reader function that indexes pins  
       } else {
         values[i] = 0.0;
       }
